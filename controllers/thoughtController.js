@@ -81,4 +81,40 @@ module.exports = {
         res.status(500).json(err);
       });
   },
+
+  addReaction(req, res) {
+    console.log(`Adding reaction to thought with ID: ${req.params.thoughtId}`);
+    Thought.findOneAndUpdate(
+      { _id: req.params.thoughtId },
+      { $addToSet: { reactions: req.body } },
+      { new: true, runValidators: true }
+    )
+      .then((thought) =>
+        !thought
+          ? res.status(404).json({ message: 'No thought with that ID' })
+          : res.json(thought)
+      )
+      .catch((err) => {
+        console.error(`Error adding reaction to thought with ID ${req.params.thoughtId}:`, err);
+        res.status(500).json(err);
+      });
+  },
+
+  removeReaction(req, res) {
+    console.log(`Removing reaction with ID: ${req.params.reactionId} from thought with ID: ${req.params.thoughtId}`);
+    Thought.findOneAndUpdate(
+      { _id: req.params.thoughtId },
+      { $pull: { reactions: { reactionId: req.params.reactionId } } },
+      { new: true }
+    )
+      .then((thought) =>
+        !thought
+          ? res.status(404).json({ message: 'No thought with that ID' })
+          : res.json(thought)
+      )
+      .catch((err) => {
+        console.error(`Error removing reaction with ID ${req.params.reactionId}:`, err);
+        res.status(500).json(err);
+      });
+  },
 };
